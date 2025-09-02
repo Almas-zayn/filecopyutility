@@ -126,6 +126,13 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
+    // WAL like durable updation
+    if (fsync(desfd) != 0)
+    {
+        perror("fsync");
+        close(desfd);
+        return 1;
+    }
 
     if (bytes_read < 0)
         perror("read");
@@ -133,6 +140,6 @@ int main(int argc, char *argv[])
     close(srcfd);
     close(desfd);
 
-    printf("File copy from Source File : %s to Destination File : %s completed successfully\n", argv[1], argv[2]);
+    printf("File Content copied from Source File : %s to Destination File : %s  successfully\n", argv[1], argv[2]);
     return 0;
 }
