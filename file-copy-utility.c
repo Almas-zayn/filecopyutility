@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <sys/stat.h>
 #include <errno.h>
 #define BUFFER_SIZE 1024
@@ -54,11 +55,41 @@ static ssize_t write_all(int fd, const void *buffer, size_t count)
     return (ssize_t)count;
 }
 
+bool isFileEmpty(int fd)
+{
+    if (fd == -1)
+    {
+        perror("The file is not open with this file Descripter Invalid file descripter ");
+        return true;
+    }
+    struct stat st;
+    if (fstat(fd, &st) == -1)
+    {
+        perror("fstat");
+        return 1;
+    }
+    if (st.st_size == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 3)
     {
-        printf("Missing file names or invalid number of arguments\n");
+        if (argc == 2)
+        {
+            printf("Missing Destination file");
+        }
+        else
+        {
+            printf("Missing Source File and Destnation file names or invalid number of arguments\n");
+        }
         return 1;
     }
 
@@ -67,6 +98,11 @@ int main(int argc, char *argv[])
     {
         perror("open source");
         return 1;
+    }
+    if (isFileEmpty(srcfd))
+    {
+        printf("The Source File : %s is Empty ", argv[1]);
+        return 0;
     }
 
     int desfd = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -97,6 +133,6 @@ int main(int argc, char *argv[])
     close(srcfd);
     close(desfd);
 
-    printf("File copy completed successfully\n");
+    printf("File copy from Source File : %s to Destination File : %s completed successfully\n", argv[1], argv[2]);
     return 0;
 }
